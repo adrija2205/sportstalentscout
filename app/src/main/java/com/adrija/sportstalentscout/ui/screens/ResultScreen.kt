@@ -78,7 +78,6 @@ fun ResultScreen(
             )
 
             if (isAssessing) {
-                // Loading state
                 Column(
                     modifier = Modifier.fillMaxSize(),
                     horizontalAlignment = Alignment.CenterHorizontally,
@@ -273,12 +272,38 @@ fun ResultScreen(
                     }
 
                     item {
+                        Button(
+                            onClick = {
+                               /*todo*/
+                            },
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .height(56.dp),
+                            colors = ButtonDefaults.buttonColors(
+                                containerColor = Color(0xFFCDDC39)
+                            )
+                        ) {
+                            Icon(
+                                Icons.Default.CloudUpload,
+                                contentDescription = null,
+                                tint = Color.Black
+                            )
+                            Spacer(modifier = Modifier.width(8.dp))
+                            Text(
+                                text = "Submit Results",
+                                style = MaterialTheme.typography.titleMedium,
+                                color = Color.Black,
+                                fontWeight = FontWeight.Bold
+                            )
+                        }
+                    }
+
+                    item {
                         Spacer(modifier = Modifier.height(80.dp))
                     }
                 }
             }
         }
-
 
         if (!isAssessing && latestResult != null) {
             Surface(

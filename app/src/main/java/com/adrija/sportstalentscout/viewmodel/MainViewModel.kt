@@ -5,7 +5,6 @@ import com.adrija.sportstalentscout.data.models.Badge
 import com.adrija.sportstalentscout.data.models.LeaderboardEntry
 import com.adrija.sportstalentscout.data.models.TestResult
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import kotlin.random.Random

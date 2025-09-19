@@ -3,6 +3,7 @@ package com.adrija.sportstalentscout.ui.screens
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
@@ -18,6 +19,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.adrija.sportstalentscout.ui.components.BadgeItem
 import com.adrija.sportstalentscout.viewmodel.MainViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -29,6 +31,7 @@ fun ProfileScreen(
 ) {
     val currentUser by viewModel.currentUser.collectAsState()
     val testResults by viewModel.testResults.collectAsState()
+    val badges by viewModel.badges.collectAsState()
 
     val userWeight = 75f // kg
     val userHeight = 165f // cm
@@ -70,7 +73,7 @@ fun ProfileScreen(
                 contentPadding = PaddingValues(16.dp),
                 verticalArrangement = Arrangement.spacedBy(16.dp)
             ) {
-
+                // Profile header card
                 item {
                     Card(
                         modifier = Modifier.fillMaxWidth(),
@@ -91,7 +94,6 @@ fun ProfileScreen(
                                 verticalAlignment = Alignment.CenterVertically
                             ) {
                                 Column {
-
                                     Surface(
                                         modifier = Modifier
                                             .size(80.dp)
@@ -165,6 +167,7 @@ fun ProfileScreen(
                     }
                 }
 
+                // BMI Card
                 item {
                     Card(
                         modifier = Modifier.fillMaxWidth(),
@@ -218,6 +221,7 @@ fun ProfileScreen(
                     }
                 }
 
+                // Achievements/Badges Card
                 item {
                     Card(
                         colors = CardDefaults.cardColors(
@@ -228,34 +232,120 @@ fun ProfileScreen(
                         Column(
                             modifier = Modifier.padding(16.dp)
                         ) {
-                            MenuItemRow(
-                                icon = Icons.Default.Person,
-                                title = "Profile",
-                                onClick = { /* Handle profile click */ }
+                            Text(
+                                text = "Achievements",
+                                style = MaterialTheme.typography.titleLarge,
+                                fontWeight = FontWeight.Bold,
+                                color = Color.White
                             )
-                            MenuItemRow(
-                                icon = Icons.Default.Star,
-                                title = "Favorite",
-                                onClick = { /* Handle favorite click */ }
-                            )
-                            MenuItemRow(
-                                icon = Icons.Default.Settings,
-                                title = "Settings",
-                                onClick = { /* Handle settings click */ }
-                            )
-                            MenuItemRow(
-                                icon = Icons.Default.Dashboard,
-                                title = "Dashboard",
-                                onClick = { /* Handle dashboard click */ }
-                            )
-                            MenuItemRow(
-                                icon = Icons.Default.ExitToApp,
-                                title = "Logout",
-                                onClick = { /* Handle logout */ }
-                            )
+
+                            Spacer(modifier = Modifier.height(16.dp))
+
+                            if (badges.isNotEmpty()) {
+                                badges.forEach { badge ->
+                                    BadgeItem(
+                                        badge = badge,
+                                        modifier = Modifier.padding(vertical = 4.dp)
+                                    )
+                                }
+                            } else {
+
+                                Column(
+                                    verticalArrangement = Arrangement.spacedBy(8.dp)
+                                ) {
+                                    BadgePlaceholder(
+                                        title = "First Test",
+                                        description = "Complete your first fitness test",
+                                        isEarned = testResults.isNotEmpty()
+                                    )
+                                    BadgePlaceholder(
+                                        title = "Speed Demon",
+                                        description = "Complete a speed test",
+                                        isEarned = testResults.any { it.testType.contains("Speed") }
+                                    )
+                                    BadgePlaceholder(
+                                        title = "Strong Performer",
+                                        description = "Complete a strength test",
+                                        isEarned = testResults.any { it.testType.contains("Strength") }
+                                    )
+                                    BadgePlaceholder(
+                                        title = "Agility Master",
+                                        description = "Complete an agility test",
+                                        isEarned = testResults.any { it.testType.contains("Agility") }
+                                    )
+                                    BadgePlaceholder(
+                                        title = "Endurance Champion",
+                                        description = "Complete an endurance test",
+                                        isEarned = testResults.any { it.testType.contains("Endurance") }
+                                    )
+                                }
+                            }
                         }
                     }
                 }
+            }
+        }
+    }
+}
+
+@Composable
+fun BadgePlaceholder(
+    title: String,
+    description: String,
+    isEarned: Boolean
+) {
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        colors = CardDefaults.cardColors(
+            containerColor = if (isEarned) Color(0xFFCDDC39).copy(alpha = 0.2f)
+            else Color.White.copy(alpha = 0.05f)
+        ),
+        shape = RoundedCornerShape(12.dp)
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(16.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Surface(
+                modifier = Modifier.size(48.dp),
+                color = if (isEarned) Color(0xFFCDDC39) else Color.White.copy(alpha = 0.2f),
+                shape = CircleShape
+            ) {
+                Icon(
+                    imageVector = Icons.Default.Star,
+                    contentDescription = null,
+                    modifier = Modifier.size(24.dp),
+                    tint = if (isEarned) Color.Black else Color.White.copy(alpha = 0.5f)
+                )
+            }
+
+            Spacer(modifier = Modifier.width(16.dp))
+
+            Column(
+                modifier = Modifier.weight(1f)
+            ) {
+                Text(
+                    text = title,
+                    style = MaterialTheme.typography.titleSmall,
+                    fontWeight = FontWeight.Bold,
+                    color = if (isEarned) Color(0xFFCDDC39) else Color.White
+                )
+                Text(
+                    text = description,
+                    style = MaterialTheme.typography.bodySmall,
+                    color = Color.White.copy(alpha = 0.7f)
+                )
+            }
+
+            if (isEarned) {
+                Icon(
+                    Icons.Default.CheckCircle,
+                    contentDescription = "Earned",
+                    tint = Color(0xFFCDDC39),
+                    modifier = Modifier.size(24.dp)
+                )
             }
         }
     }
@@ -299,7 +389,6 @@ fun BMIScale(currentBMI: Float) {
         Color(0xFFFBBC04), // Yellow - Overweight
         Color(0xFFEA4335)  // Red - Obese
     )
-
     Column {
         // Color bar
         Row(
@@ -333,48 +422,6 @@ fun BMIScale(currentBMI: Float) {
                 )
             }
         }
-    }
-}
-
-@Composable
-fun MenuItemRow(
-    icon: androidx.compose.ui.graphics.vector.ImageVector,
-    title: String,
-    onClick: () -> Unit
-) {
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(vertical = 12.dp),
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        Surface(
-            color = Color(0xFFC21E56),
-            shape = CircleShape,
-            modifier = Modifier.size(40.dp)
-        ) {
-            Icon(
-                imageVector = icon,
-                contentDescription = null,
-                modifier = Modifier.size(20.dp),
-                tint = Color.White
-            )
-        }
-
-        Spacer(modifier = Modifier.width(16.dp))
-
-        Text(
-            text = title,
-            style = MaterialTheme.typography.bodyLarge,
-            color = Color.White,
-            modifier = Modifier.weight(1f)
-        )
-
-        Icon(
-            Icons.Default.KeyboardArrowRight,
-            contentDescription = null,
-            tint = Color.White
-        )
     }
 }
 
