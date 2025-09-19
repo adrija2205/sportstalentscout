@@ -221,7 +221,6 @@ fun ProfileScreen(
                     }
                 }
 
-                // Achievements/Badges Card
                 item {
                     Card(
                         colors = CardDefaults.cardColors(
@@ -390,7 +389,7 @@ fun BMIScale(currentBMI: Float) {
         Color(0xFFEA4335)  // Red - Obese
     )
     Column {
-        // Color bar
+
         Row(
             modifier = Modifier
                 .fillMaxWidth()
@@ -408,7 +407,6 @@ fun BMIScale(currentBMI: Float) {
 
         Spacer(modifier = Modifier.height(8.dp))
 
-        // Labels
         Row(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.SpaceBetween
