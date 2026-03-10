@@ -33,68 +33,66 @@ fun HomeScreen(
     var selectedAssessment by remember { mutableStateOf<PastAssessment?>(null) }
     var showTestsList by remember { mutableStateOf(false) }
 
-    // Hardcoded past assessments
     val pastAssessments = mapOf(
-        "Speed Test" to PastAssessment(
-            testType = "Speed Test",
+        "Push-ups" to PastAssessment(
+            testType = "Push-ups",
             date = "December 15, 2024",
             score = 85,
-            result = "12.3",
-            unit = "seconds",
+            result = "32",
+            unit = "reps",
             rank = 15,
-            analysis = "Good speed performance! You're running faster than 70% of athletes in your age group.",
+            analysis = "Great upper body strength! You're above 70% of athletes in your age group.",
             recommendations = listOf(
-                "Focus on explosive starts",
-                "Improve running form",
-                "Add interval training to your routine"
-            )
-        ),
-        "Strength Test" to PastAssessment(
-            testType = "Strength Test",
-            date = "December 10, 2024",
-            score = 92,
-            result = "45",
-            unit = "push-ups",
-            rank = 8,
-            analysis = "Excellent upper body strength! You're in the top 10% for your age category.",
-            recommendations = listOf(
-                "Maintain current routine",
                 "Add progressive overload",
+                "Focus on full range of motion",
                 "Include core strengthening exercises"
             )
         ),
-        "Agility Test" to PastAssessment(
-            testType = "Agility Test",
-            date = "December 8, 2024",
+        "Squats" to PastAssessment(
+            testType = "Squats",
+            date = "December 12, 2024",
             score = 78,
-            result = "15.8",
-            unit = "seconds",
-            rank = 23,
-            analysis = "Good agility performance with room for improvement in lateral movements.",
+            result = "28",
+            unit = "reps",
+            rank = 22,
+            analysis = "Good lower body endurance with room to improve depth.",
             recommendations = listOf(
-                "Practice cone drills",
-                "Work on change of direction speed",
-                "Strengthen hip flexors and glutes"
+                "Focus on squat depth — thighs parallel to floor",
+                "Strengthen hip flexors",
+                "Add goblet squats for form practice"
             )
         ),
-        "Endurance Test" to PastAssessment(
-            testType = "Endurance Test",
-            date = "December 5, 2024",
-            score = 88,
-            result = "18:45",
-            unit = "minutes",
-            rank = 12,
-            analysis = "Strong cardiovascular endurance! Your stamina is well above average.",
+        "Bicep Curls" to PastAssessment(
+            testType = "Bicep Curls",
+            date = "December 10, 2024",
+            score = 92,
+            result = "22",
+            unit = "reps",
+            rank = 8,
+            analysis = "Excellent bicep strength! You're in the top 10% for your age category.",
             recommendations = listOf(
-                "Increase training volume gradually",
-                "Add tempo runs",
-                "Include cross-training activities"
+                "Maintain current routine",
+                "Try hammer curls for variation",
+                "Increase weight gradually"
+            )
+        ),
+        "Shoulder Press" to PastAssessment(
+            testType = "Shoulder Press",
+            date = "December 8, 2024",
+            score = 80,
+            result = "18",
+            unit = "reps",
+            rank = 18,
+            analysis = "Good shoulder strength. Consistent training will push you to the next level.",
+            recommendations = listOf(
+                "Include lateral raises for shoulder width",
+                "Strengthen rotator cuff muscles",
+                "Practice overhead mobility drills"
             )
         )
     )
 
-    // Default assessment to show when Tests list is clicked (most recent one)
-    val defaultAssessment = pastAssessments["Speed Test"]
+    val defaultAssessment = pastAssessments["Push-ups"]
 
     Box(
         modifier = modifier
@@ -102,7 +100,6 @@ fun HomeScreen(
             .background(Color(0xFF1A1A1A))
     ) {
         when {
-            // Show specific assessment from test card click
             selectedAssessment != null -> {
                 PastAssessmentScreen(
                     assessment = selectedAssessment!!,
@@ -112,7 +109,6 @@ fun HomeScreen(
                     }
                 )
             }
-            // Show default assessment from tests list button click
             showTestsList && defaultAssessment != null -> {
                 PastAssessmentScreen(
                     assessment = defaultAssessment,
@@ -122,12 +118,10 @@ fun HomeScreen(
                     }
                 )
             }
-            // Show Home Screen
             else -> {
-                Column(
-                    modifier = Modifier.fillMaxSize()
-                ) {
-                    // Header Section with proper top padding
+                Column(modifier = Modifier.fillMaxSize()) {
+
+                    // ── Header ────────────────────────────────────────────────
                     Column(
                         modifier = Modifier
                             .fillMaxWidth()
@@ -138,11 +132,9 @@ fun HomeScreen(
                             style = MaterialTheme.typography.headlineLarge,
                             fontWeight = FontWeight.Bold,
                             fontSize = 32.sp,
-                            color = Color(0xFFC21E56) // Red color
+                            color = Color(0xFFC21E56)
                         )
-
                         Spacer(modifier = Modifier.height(8.dp))
-
                         Text(
                             text = "It's time to challenge your limits.",
                             style = MaterialTheme.typography.bodyLarge,
@@ -151,24 +143,22 @@ fun HomeScreen(
                         )
                     }
 
-                    // Main content area
                     LazyColumn(
                         modifier = Modifier.weight(1f),
                         contentPadding = PaddingValues(horizontal = 24.dp),
                         verticalArrangement = Arrangement.spacedBy(20.dp)
                     ) {
-                        // General Athlete Test Card
+
+                        // ── Banner card ───────────────────────────────────────
                         item {
                             Card(
                                 modifier = Modifier.fillMaxWidth(),
                                 shape = RoundedCornerShape(16.dp),
                                 colors = CardDefaults.cardColors(
-                                    containerColor = Color(0xFFCDDC39) // Lime green color
+                                    containerColor = Color(0xFFCDDC39)
                                 )
                             ) {
-                                Column(
-                                    modifier = Modifier.padding(24.dp)
-                                ) {
+                                Column(modifier = Modifier.padding(24.dp)) {
                                     Text(
                                         text = "General Athlete Test",
                                         style = MaterialTheme.typography.titleLarge,
@@ -187,67 +177,62 @@ fun HomeScreen(
                             }
                         }
 
-                        // Four Test Cards in 2x2 Grid
+                        // ── 4 Test Cards in 2×2 grid ──────────────────────────
                         item {
-                            Column(
-                                verticalArrangement = Arrangement.spacedBy(16.dp)
-                            ) {
+                            Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
 
+                                // Row 1: Push-ups | Squats
                                 Row(
                                     modifier = Modifier.fillMaxWidth(),
                                     horizontalArrangement = Arrangement.spacedBy(16.dp)
                                 ) {
                                     TestCard(
-                                        title = "Speed",
-                                        iconRes = R.drawable.file_icons_powerbuilder,
-                                        onClick = { onTestSelected("Speed Test") },
+                                        title    = "Push-ups",
+                                        iconRes  = R.drawable.iconoir_gym,
+                                        onClick  = { onTestSelected("Push-ups") },
                                         modifier = Modifier.weight(1f)
                                     )
                                     TestCard(
-                                        title = "Strength",
-                                        iconRes = R.drawable.iconoir_gym,
-                                        onClick = { onTestSelected("Strength Test") },
+                                        title    = "Squats",
+                                        iconRes  = R.drawable.vector,
+                                        onClick  = { onTestSelected("Squats") },
                                         modifier = Modifier.weight(1f)
                                     )
                                 }
 
-
+                                // Row 2: Bicep Curls | Shoulder Press
                                 Row(
                                     modifier = Modifier.fillMaxWidth(),
                                     horizontalArrangement = Arrangement.spacedBy(16.dp)
                                 ) {
                                     TestCard(
-                                        title = "Agility",
-                                        iconRes = R.drawable.vector,
-                                        onClick = { onTestSelected("Agility Test") },
+                                        title    = "Bicep Curls",
+                                        iconRes  = R.drawable.file_icons_powerbuilder,
+                                        onClick  = { onTestSelected("Bicep Curls") },
                                         modifier = Modifier.weight(1f)
                                     )
                                     TestCard(
-                                        title = "Endurance",
-                                        iconRes = R.drawable.picon_jump,
-                                        onClick = { onTestSelected("Endurance Test") },
+                                        title    = "Shoulder Press",
+                                        iconRes  = R.drawable.picon_jump,
+                                        onClick  = { onTestSelected("Shoulder Press") },
                                         modifier = Modifier.weight(1f)
                                     )
                                 }
                             }
                         }
 
-                        // Bottom spacing for navigation
-                        item {
-                            Spacer(modifier = Modifier.height(120.dp))
-                        }
+                        // Bottom spacing for nav bar
+                        item { Spacer(modifier = Modifier.height(120.dp)) }
                     }
                 }
 
-                // Bottom Navigation Bar
+                // ── Bottom Navigation Bar (unchanged) ─────────────────────────
                 Card(
                     modifier = Modifier
                         .fillMaxWidth()
                         .align(Alignment.BottomCenter),
                     shape = RoundedCornerShape(topStart = 24.dp, topEnd = 24.dp),
-                    colors = CardDefaults.cardColors(
-                        containerColor = Color(0xFFC21E56) // Red bottom nav
-                    )
+                    colors = CardDefaults.cardColors(containerColor = Color(0xFFC21E56))
                 ) {
                     Row(
                         modifier = Modifier
@@ -263,8 +248,6 @@ fun HomeScreen(
                                 modifier = Modifier.size(28.dp)
                             )
                         }
-
-                        // Updated Tests list button - now shows past assessment
                         IconButton(onClick = {
                             showTestsList = true
                             selectedAssessment = null
