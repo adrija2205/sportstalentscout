@@ -1,5 +1,5 @@
 package com.adrija.sportstalentscout.viewmodel
-
+import com.adrija.sportstalentscout.data.models.AngleSample
 import android.app.Application
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
@@ -32,6 +32,9 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
 
     private val _testResults = MutableStateFlow<List<TestResult>>(emptyList())
     val testResults = _testResults.asStateFlow()
+
+    private val _angleSamples = MutableStateFlow<List<AngleSample>>(emptyList())
+    val angleSamples = _angleSamples.asStateFlow()
 
     private val _isAssessing = MutableStateFlow(false)
     val isAssessing = _isAssessing.asStateFlow()
@@ -189,10 +192,15 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
             _analysisError.value = null
 
             try {
-                val result = videoProcessor.analyzeVideo(
-                    videoPath    = videoPath,
+                val videoResult = videoProcessor.analyzeVideo(
+                    videoPath = videoPath,
                     exerciseType = _selectedTest.value
                 )
+
+                val result = videoResult.testResult
+
+                _testResults.value = _testResults.value + result
+                _angleSamples.value = videoResult.angleSamples
 
                 // Persist as a PastAssessment so it shows in history
                 val analysis = when {

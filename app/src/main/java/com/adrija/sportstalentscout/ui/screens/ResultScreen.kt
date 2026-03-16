@@ -6,6 +6,7 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
+import androidx.compose.material.icons.automirrored.filled.TrendingUp
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -14,9 +15,10 @@ import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.viewmodel.compose.viewModel
 import com.adrija.sportstalentscout.ui.components.PerformanceChart
+import com.adrija.sportstalentscout.ui.components.ExerciseWaveformChart
 import com.adrija.sportstalentscout.viewmodel.MainViewModel
+
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -26,14 +28,17 @@ fun ResultScreen(
     onRetakeTest: () -> Unit,
     modifier: Modifier = Modifier
 ) {
+
     val isAssessing   by viewModel.isAssessing.collectAsState()
     val testResults   by viewModel.testResults.collectAsState()
     val selectedTest  by viewModel.selectedTest.collectAsState()
     val analysisError by viewModel.analysisError.collectAsState()
+    val angleSamples  by viewModel.angleSamples.collectAsState()
 
     val latestResult = testResults.lastOrNull()
 
     val infiniteTransition = rememberInfiniteTransition(label = "pulse")
+
     val scale by infiniteTransition.animateFloat(
         initialValue = 0.8f,
         targetValue  = 1.2f,
@@ -49,238 +54,303 @@ fun ResultScreen(
             .fillMaxSize()
             .background(Color(0xFF1A1A1A))
     ) {
+
         Column(modifier = Modifier.fillMaxSize()) {
 
             TopAppBar(
-                title  = { Text("Test Results", color = Color.White) },
+                title = { Text("Test Results", color = Color.White) },
                 actions = {
                     if (!isAssessing && latestResult != null) {
                         IconButton(onClick = onBackToHome) {
-                            Icon(Icons.Default.Home, contentDescription = "Home", tint = Color.White)
+                            Icon(Icons.Default.Home, null, tint = Color.White)
                         }
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor         = Color(0xFFC21E56),
-                    titleContentColor      = Color.White,
-                    actionIconContentColor = Color.White
+                    containerColor = Color(0xFFC21E56)
                 )
             )
 
             when {
-                // ── Analysing state ───────────────────────────────────────────
+
+                // ───── ANALYSING STATE ─────
                 isAssessing -> {
+
                     Column(
-                        modifier              = Modifier.fillMaxSize(),
-                        horizontalAlignment   = Alignment.CenterHorizontally,
-                        verticalArrangement   = Arrangement.Center
+                        modifier = Modifier.fillMaxSize(),
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        verticalArrangement = Arrangement.Center
                     ) {
+
                         Icon(
                             Icons.Default.Analytics,
-                            contentDescription = null,
+                            null,
                             modifier = Modifier.size(120.dp).scale(scale),
-                            tint     = Color(0xFFC21E56)
+                            tint = Color(0xFFC21E56)
                         )
+
                         Spacer(modifier = Modifier.height(24.dp))
+
                         Text(
-                            text       = "Counting Your Reps...",
-                            style      = MaterialTheme.typography.titleLarge,
+                            "Counting Your Reps...",
+                            style = MaterialTheme.typography.titleLarge,
                             fontWeight = FontWeight.Bold,
-                            color      = Color.White
+                            color = Color.White
                         )
+
                         Spacer(modifier = Modifier.height(8.dp))
+
                         Text(
-                            text  = "Analysing $selectedTest with AI pose detection",
-                            style = MaterialTheme.typography.bodyMedium,
+                            "Analysing $selectedTest with AI pose detection",
                             color = Color.White.copy(alpha = 0.7f)
                         )
+
                         Spacer(modifier = Modifier.height(32.dp))
+
                         LinearProgressIndicator(
-                            modifier   = Modifier.fillMaxWidth(0.6f),
-                            color      = Color(0xFFC21E56),
-                            trackColor = Color.White.copy(alpha = 0.2f)
+                            modifier = Modifier.fillMaxWidth(0.6f),
+                            color = Color(0xFFC21E56)
                         )
                     }
                 }
 
-                // ── Error state ───────────────────────────────────────────────
+                // ───── ERROR STATE ─────
                 analysisError != null -> {
+
                     Column(
-                        modifier            = Modifier.fillMaxSize().padding(24.dp),
+                        modifier = Modifier.fillMaxSize().padding(24.dp),
                         horizontalAlignment = Alignment.CenterHorizontally,
                         verticalArrangement = Arrangement.Center
                     ) {
+
                         Icon(
                             Icons.Default.ErrorOutline,
-                            contentDescription = null,
+                            null,
                             modifier = Modifier.size(72.dp),
-                            tint     = Color(0xFFC21E56)
+                            tint = Color(0xFFC21E56)
                         )
+
                         Spacer(modifier = Modifier.height(16.dp))
+
                         Text(
-                            text       = "Analysis Failed",
-                            style      = MaterialTheme.typography.titleLarge,
+                            "Analysis Failed",
+                            style = MaterialTheme.typography.titleLarge,
                             fontWeight = FontWeight.Bold,
-                            color      = Color.White
+                            color = Color.White
                         )
+
                         Spacer(modifier = Modifier.height(8.dp))
+
                         Text(
-                            text  = analysisError ?: "",
-                            style = MaterialTheme.typography.bodyMedium,
+                            analysisError ?: "",
                             color = Color.White.copy(alpha = 0.7f)
                         )
+
                         Spacer(modifier = Modifier.height(32.dp))
+
                         Button(
                             onClick = {
                                 viewModel.clearError()
                                 onRetakeTest()
-                            },
-                            colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFCDDC39))
+                            }
                         ) {
-                            Icon(Icons.Default.Refresh, contentDescription = null, tint = Color.Black)
-                            Spacer(modifier = Modifier.width(8.dp))
-                            Text("Retake Test", color = Color.Black, fontWeight = FontWeight.Bold)
+                            Text("Retake Test")
                         }
                     }
                 }
 
-                // ── Results state ─────────────────────────────────────────────
+                // ───── RESULT STATE ─────
                 latestResult != null -> {
+
                     LazyColumn(
-                        modifier        = Modifier.fillMaxSize(),
-                        contentPadding  = PaddingValues(16.dp),
+                        modifier = Modifier.fillMaxSize(),
+                        contentPadding = PaddingValues(16.dp),
                         verticalArrangement = Arrangement.spacedBy(16.dp)
                     ) {
 
-                        // ── Hero result card ──────────────────────────────────
+                        // RESULT CARD
                         item {
+
                             Card(
                                 modifier = Modifier.fillMaxWidth(),
-                                colors   = CardDefaults.cardColors(containerColor = Color(0xFFC21E56))
+                                colors = CardDefaults.cardColors(
+                                    containerColor = Color(0xFFC21E56)
+                                )
                             ) {
+
                                 Column(
-                                    modifier            = Modifier.padding(24.dp),
+                                    modifier = Modifier.padding(24.dp),
                                     horizontalAlignment = Alignment.CenterHorizontally
                                 ) {
+
                                     Icon(
                                         Icons.Default.EmojiEvents,
-                                        contentDescription = null,
+                                        null,
                                         modifier = Modifier.size(48.dp),
-                                        tint     = Color.White
+                                        tint = Color.White
                                     )
+
                                     Spacer(modifier = Modifier.height(16.dp))
-                                    Text("Your Result", style = MaterialTheme.typography.titleMedium, color = Color.White)
+
+                                    Text("Your Result", color = Color.White)
+
                                     Text(
-                                        text       = "${latestResult.value} ${latestResult.unit}",
-                                        style      = MaterialTheme.typography.displayMedium,
+                                        "${latestResult.value} ${latestResult.unit}",
+                                        style = MaterialTheme.typography.displayMedium,
                                         fontWeight = FontWeight.Bold,
-                                        color      = Color.White
+                                        color = Color.White
                                     )
+
                                     Text(
-                                        text  = latestResult.testType,
-                                        style = MaterialTheme.typography.titleMedium,
+                                        latestResult.testType,
                                         color = Color.White.copy(alpha = 0.9f)
                                     )
                                 }
                             }
                         }
 
-                        // ── Score + Rank row ──────────────────────────────────
+                        // SCORE + RANK
                         item {
+
                             Row(
-                                modifier            = Modifier.fillMaxWidth(),
+                                modifier = Modifier.fillMaxWidth(),
                                 horizontalArrangement = Arrangement.spacedBy(12.dp)
                             ) {
-                                // Score card
+
                                 Card(
                                     modifier = Modifier.weight(1f),
-                                    colors   = CardDefaults.cardColors(containerColor = Color.White.copy(alpha = 0.1f))
+                                    colors = CardDefaults.cardColors(
+                                        containerColor = Color.White.copy(alpha = 0.1f)
+                                    )
                                 ) {
+
                                     Column(
-                                        modifier            = Modifier.padding(16.dp),
+                                        modifier = Modifier.padding(16.dp),
                                         horizontalAlignment = Alignment.CenterHorizontally
                                     ) {
-                                        Icon(Icons.Default.Star, contentDescription = null, tint = Color(0xFFCDDC39))
+
+                                        Icon(
+                                            Icons.Default.Star,
+                                            null,
+                                            tint = Color(0xFFCDDC39)
+                                        )
+
                                         Spacer(modifier = Modifier.height(8.dp))
-                                        Text("Score", style = MaterialTheme.typography.bodyMedium, color = Color.White)
+
+                                        Text("Score", color = Color.White)
+
                                         Text(
-                                            text       = "${latestResult.score}",
-                                            style      = MaterialTheme.typography.titleLarge,
+                                            "${latestResult.score}",
+                                            style = MaterialTheme.typography.titleLarge,
                                             fontWeight = FontWeight.Bold,
-                                            color      = Color(0xFFCDDC39)
+                                            color = Color(0xFFCDDC39)
                                         )
                                     }
                                 }
 
-                                // Rank card
                                 Card(
                                     modifier = Modifier.weight(1f),
-                                    colors   = CardDefaults.cardColors(containerColor = Color.White.copy(alpha = 0.1f))
+                                    colors = CardDefaults.cardColors(
+                                        containerColor = Color.White.copy(alpha = 0.1f)
+                                    )
                                 ) {
+
                                     Column(
-                                        modifier            = Modifier.padding(16.dp),
+                                        modifier = Modifier.padding(16.dp),
                                         horizontalAlignment = Alignment.CenterHorizontally
                                     ) {
-                                        Icon(Icons.Default.TrendingUp, contentDescription = null, tint = Color(0xFFC21E56))
+
+                                        Icon(
+                                            Icons.AutoMirrored.Filled.TrendingUp,
+                                            null,
+                                            tint = Color(0xFFC21E56)
+                                        )
+
                                         Spacer(modifier = Modifier.height(8.dp))
-                                        Text("Rank", style = MaterialTheme.typography.bodyMedium, color = Color.White)
+
+                                        Text("Rank", color = Color.White)
+
                                         Text(
-                                            text       = "#${viewModel.getUserRank()}",
-                                            style      = MaterialTheme.typography.titleLarge,
+                                            "#${viewModel.getUserRank()}",
+                                            style = MaterialTheme.typography.titleLarge,
                                             fontWeight = FontWeight.Bold,
-                                            color      = Color(0xFFC21E56)
+                                            color = Color(0xFFC21E56)
                                         )
                                     }
                                 }
                             }
                         }
 
-                        // ── Performance chart ─────────────────────────────────
+                        // PERFORMANCE TREND
                         item {
-                            PerformanceChart(testResults = testResults.takeLast(5))
+
+                            PerformanceChart(
+                                testResults = testResults.takeLast(5)
+                            )
                         }
 
-                        // ── Analysis card ─────────────────────────────────────
+                        // EXERCISE MOTION GRAPH
                         item {
+
+                            ExerciseWaveformChart(
+                                samples = angleSamples
+                            )
+                        }
+
+                        // PERFORMANCE ANALYSIS
+                        item {
+
                             Card(
-                                colors = CardDefaults.cardColors(containerColor = Color.White.copy(alpha = 0.1f))
+                                colors = CardDefaults.cardColors(
+                                    containerColor = Color.White.copy(alpha = 0.1f)
+                                )
                             ) {
+
                                 Column(modifier = Modifier.padding(16.dp)) {
+
                                     Text(
-                                        text       = "Performance Analysis",
-                                        style      = MaterialTheme.typography.titleMedium,
+                                        "Performance Analysis",
                                         fontWeight = FontWeight.Bold,
-                                        color      = Color.White
+                                        color = Color.White
                                     )
+
                                     Spacer(modifier = Modifier.height(12.dp))
+
                                     val analysis = when {
-                                        latestResult.score >= 85 -> "Outstanding performance! You're in the top tier for ${latestResult.testType}."
-                                        latestResult.score >= 70 -> "Great job! Above average performance."
-                                        latestResult.score >= 50 -> "Good work! Keep building consistency."
-                                        else                     -> "Keep practicing — every rep counts!"
+                                        latestResult.score >= 85 -> "Outstanding performance!"
+                                        latestResult.score >= 70 -> "Great job!"
+                                        latestResult.score >= 50 -> "Good work!"
+                                        else -> "Keep practicing."
                                     }
+
                                     Text(
-                                        text  = analysis,
-                                        style = MaterialTheme.typography.bodyMedium,
+                                        analysis,
                                         color = Color.White.copy(alpha = 0.9f)
                                     )
                                 }
                             }
                         }
 
-                        // ── Submit button ─────────────────────────────────────
+                        // SUBMIT BUTTON
                         item {
+
                             Button(
-                                onClick  = { viewModel.submitTestResults() },
-                                modifier = Modifier.fillMaxWidth().height(56.dp),
-                                colors   = ButtonDefaults.buttonColors(containerColor = Color(0xFFCDDC39))
+                                onClick = { viewModel.submitTestResults() },
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .height(56.dp),
+                                colors = ButtonDefaults.buttonColors(
+                                    containerColor = Color(0xFFCDDC39)
+                                )
                             ) {
-                                Icon(Icons.Default.CloudUpload, contentDescription = null, tint = Color.Black)
+
+                                Icon(Icons.Default.CloudUpload, null, tint = Color.Black)
+
                                 Spacer(modifier = Modifier.width(8.dp))
+
                                 Text(
-                                    text       = "Submit Results",
-                                    style      = MaterialTheme.typography.titleMedium,
-                                    color      = Color.Black,
+                                    "Submit Results",
+                                    color = Color.Black,
                                     fontWeight = FontWeight.Bold
                                 )
                             }
@@ -292,37 +362,48 @@ fun ResultScreen(
             }
         }
 
-        // ── Bottom bar (Retake / Home) ─────────────────────────────────────────
+        // BOTTOM BAR
         if (!isAssessing && latestResult != null && analysisError == null) {
+
             Surface(
-                modifier       = Modifier.fillMaxWidth().align(Alignment.BottomCenter),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .align(Alignment.BottomCenter),
                 shadowElevation = 12.dp,
-                color          = Color(0xFFC21E56)
+                color = Color(0xFFC21E56)
             ) {
+
                 Row(
-                    modifier              = Modifier.fillMaxWidth().padding(16.dp),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(16.dp),
                     horizontalArrangement = Arrangement.spacedBy(12.dp)
                 ) {
+
                     OutlinedButton(
-                        onClick  = onRetakeTest,
-                        modifier = Modifier.weight(1f),
-                        colors   = ButtonDefaults.outlinedButtonColors(contentColor = Color.White),
-                        border   = ButtonDefaults.outlinedButtonBorder.copy(
-                            brush = androidx.compose.foundation.BorderStroke(1.dp, Color.White).brush
-                        )
+                        onClick = onRetakeTest,
+                        modifier = Modifier.weight(1f)
                     ) {
-                        Icon(Icons.Default.Refresh, contentDescription = null, tint = Color.White)
+
+                        Icon(Icons.Default.Refresh, null)
+
                         Spacer(modifier = Modifier.width(8.dp))
-                        Text("Retake", color = Color.White)
+
+                        Text("Retake")
                     }
 
                     Button(
-                        onClick  = onBackToHome,
+                        onClick = onBackToHome,
                         modifier = Modifier.weight(1f),
-                        colors   = ButtonDefaults.buttonColors(containerColor = Color(0xFFCDDC39))
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = Color(0xFFCDDC39)
+                        )
                     ) {
-                        Icon(Icons.Default.Home, contentDescription = null, tint = Color.Black)
+
+                        Icon(Icons.Default.Home, null)
+
                         Spacer(modifier = Modifier.width(8.dp))
+
                         Text("Home", color = Color.Black)
                     }
                 }

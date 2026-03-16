@@ -1,5 +1,7 @@
 package com.adrija.sportstalentscout.ml
 
+import com.adrija.sportstalentscout.data.models.VideoAnalysisResult
+import com.adrija.sportstalentscout.data.models.AngleSample
 import android.content.Context
 import android.graphics.Bitmap
 import android.media.MediaMetadataRetriever
@@ -40,34 +42,95 @@ class VideoProcessor(private val context: Context) {
      * @param exerciseType  One of: "Push-ups", "Squats", "Bicep Curls", "Shoulder Press"
      * @return TestResult with real rep count and computed score
      */
-    suspend fun analyzeVideo(videoPath: String, exerciseType: String): TestResult =
-        withContext(Dispatchers.Default) {
+    suspend fun analyzeVideo(videoPath: String, exerciseType: String): VideoAnalysisResult =
+    withContext(Dispatchers.Default) {
 
-            val landmarker = buildPoseLandmarker()
-            val frames     = extractFrames(videoPath)
+        val landmarker = buildPoseLandmarker()
+        val frames = extractFrames(videoPath)
 
-            var state = RepCountState()
+        var state = RepCountState()
 
-            for (frame in frames) {
-                val landmarks = detectLandmarks(landmarker, frame)
-                if (landmarks.isNotEmpty()) {
-                    state = countRep(exerciseType, landmarks, state)
+        val angleSamples = mutableListOf<AngleSample>()
+
+        for (frame in frames) {
+
+            val landmarks = detectLandmarks(landmarker, frame)
+
+            if (landmarks.isNotEmpty()) {
+
+                val angle = when (exerciseType) {
+
+                    "Push-ups" -> {
+                        val s = landmarks[PoseLandmark.LEFT_SHOULDER]
+                        val e = landmarks[PoseLandmark.LEFT_ELBOW]
+                        val w = landmarks[PoseLandmark.LEFT_WRIST]
+                        if (s != null && e != null && w != null)
+                            ExerciseAnalyzer.findAngle(s, e, w)
+                        else null
+                    }
+
+                    "Squats" -> {
+                        val h = landmarks[PoseLandmark.RIGHT_HIP]
+                        val k = landmarks[PoseLandmark.RIGHT_KNEE]
+                        val a = landmarks[PoseLandmark.RIGHT_ANKLE]
+                        if (h != null && k != null && a != null)
+                            ExerciseAnalyzer.findAngle(h, k, a)
+                        else null
+                    }
+
+                    "Bicep Curls" -> {
+                        val s = landmarks[PoseLandmark.RIGHT_SHOULDER]
+                        val e = landmarks[PoseLandmark.RIGHT_ELBOW]
+                        val w = landmarks[PoseLandmark.RIGHT_WRIST]
+                        if (s != null && e != null && w != null)
+                            ExerciseAnalyzer.findAngle(s, e, w)
+                        else null
+                    }
+
+                    "Shoulder Press" -> {
+                        val s = landmarks[PoseLandmark.RIGHT_SHOULDER]
+                        val e = landmarks[PoseLandmark.RIGHT_ELBOW]
+                        val w = landmarks[PoseLandmark.RIGHT_WRIST]
+                        if (s != null && e != null && w != null)
+                            ExerciseAnalyzer.findAngle(s, e, w)
+                        else null
+                    }
+
+                    else -> null
                 }
-                frame.recycle()
+
+                angle?.let {
+                    angleSamples.add(
+                        AngleSample(
+                            time = System.currentTimeMillis(),
+                            angle = it
+                        )
+                    )
+                }
+
+                state = countRep(exerciseType, landmarks, state)
             }
 
-            landmarker.close()
-
-            val repCount = state.counter
-            val score    = ExerciseAnalyzer.calculateScore(exerciseType, repCount)
-
-            TestResult(
-                testType = exerciseType,
-                value    = repCount.toString(),
-                unit     = "reps",
-                score    = score
-            )
+            frame.recycle()
         }
+
+        landmarker.close()
+
+        val repCount = state.counter
+        val score = ExerciseAnalyzer.calculateScore(exerciseType, repCount)
+
+        val result = TestResult(
+            testType = exerciseType,
+            value = repCount.toString(),
+            unit = "reps",
+            score = score
+        )
+
+        VideoAnalysisResult(
+            testResult = result,
+            angleSamples = angleSamples
+        )
+    }
 
     // ── Build MediaPipe PoseLandmarker in VIDEO mode ──────────────────────────
     private fun buildPoseLandmarker(): PoseLandmarker {

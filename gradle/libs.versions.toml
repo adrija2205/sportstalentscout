@@ -1,5 +1,5 @@
 [versions]
-agp = "8.8.0"                    # Keep as original
+agp = "8.7.2"                    # Keep as original
 kotlin = "2.0.0"                 # Keep as is
 coreKtx = "1.13.1"               # Downgraded from 1.17.0
 junit = "4.13.2"
