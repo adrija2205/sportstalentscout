@@ -10,8 +10,12 @@ import com.adrija.sportstalentscout.data.models.TestResult
 import com.adrija.sportstalentscout.ml.ExerciseAnalyzer
 import com.adrija.sportstalentscout.ml.VideoProcessor
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
+import com.adrija.sportstalentscout.data.preferences.OnboardingPreferencesRepository
 
 /**
  * Replaces ViewModel : ViewModel() with AndroidViewModel so we can pass
@@ -22,6 +26,30 @@ import kotlinx.coroutines.launch
  *   → stays the same, Compose handles AndroidViewModel automatically.
  */
 class MainViewModel(application: Application) : AndroidViewModel(application) {
+
+    // ── Onboarding Preferences Repository ───────────────────────────────────
+    private val onboardingRepository = OnboardingPreferencesRepository(application.applicationContext)
+
+    /**
+     * Observable state for onboarding completion.
+     * `null` denotes the loading/unresolved state, allowing NavGraph to display a splash
+     * screen and prevent any flickering between screens.
+     */
+    val isOnboardingCompleted: StateFlow<Boolean?> = onboardingRepository.isOnboardingCompleted
+        .stateIn(
+            scope = viewModelScope,
+            started = SharingStarted.Eagerly,
+            initialValue = null
+        )
+
+    /**
+     * Marks onboarding as completed in persistent DataStore storage.
+     */
+    fun completeOnboarding() {
+        viewModelScope.launch {
+            onboardingRepository.setOnboardingCompleted(true)
+        }
+    }
 
     // ── VideoProcessor — uses app context (no leaks) ─────────────────────────
     private val videoProcessor = VideoProcessor(application.applicationContext)
