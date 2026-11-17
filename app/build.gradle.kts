@@ -63,6 +63,7 @@ dependencies {
     implementation("androidx.activity:activity-compose:1.8.0")
     implementation("androidx.lifecycle:lifecycle-viewmodel-compose:2.6.2")
     implementation("androidx.navigation:navigation-compose:2.7.4")
+    implementation("androidx.datastore:datastore-preferences:1.0.0")
 
     // CameraX dependencies
     implementation("androidx.camera:camera-core:1.3.0")
